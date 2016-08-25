@@ -19,10 +19,10 @@ Reads a [FASTA format](https://en.wikipedia.org/wiki/FASTA_format) text file and
 * Algorithm follows a general greedy shape:
   1. Start with any FASTA sequence, call this the current.
   2. In parallel:
-    1. For each remaining sequence, find the next sequence that overlaps the most by over half the length of each read with the tail of the current sequence. Repeat until no sequences remain.
+    1. For each remaining sequence, find the next sequence that overlaps the most by over half the length of each read with the right side of the current sequence. Repeat until no sequences remain.
         current: XXXAGGA
         next:    AGGAXXX
-    2. Same as above, but working to the left of the current sequence.
+    2. Same as above, but working with the left side of the current sequence.
         current: CGATXXX
         next:    XXXCGAT
   3. Glue resulting overlaps together linearly.
