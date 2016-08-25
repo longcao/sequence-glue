@@ -42,9 +42,13 @@ object FASTA {
 
     val src = Source.fromFile(file)
 
-    val lines = src.getLines.toList
+    try {
+      val lines = src.getLines.toList
 
-    parseLines(lines, List())
+      parseLines(lines, List())
+    } finally {
+      src.close()
+    }
   }
 
   def overlap(f1: FASTASequence, f2: FASTASequence): Int =
