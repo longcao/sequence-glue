@@ -8,7 +8,19 @@ import scala.io.Source
 
 case class FASTASequence(name: String, sequence: String)
 
+/**
+ * Data type representing two reads and how much they overlap on f1's right side and f2's left side.
+ *
+ * e.g.
+ *   f1 = XXXAGA
+ *   f2 = AGAXXX
+ *   value = 3
+ */
 case class Overlap(f1: FASTASequence, f2: FASTASequence, value: Int) {
+
+  /**
+   * An overlap is gluable if the overlap value is over half of the lengths of the sequences.
+   */
   def isGluable: Boolean =
     value > (Math.min(f1.sequence.length, f2.sequence.length) / 2)
 }
@@ -51,12 +63,30 @@ object FASTA {
     }
   }
 
+  /**
+   * Determines the overlap between two sequences on the first sequence's right side and the second sequences's
+   * left side.
+   *
+   * @param f1 first sequence, comparing its right side
+   * @param f2 second sequence, comparing its left side
+   * @return the number of chars that overlap on the first sequence's right side and the second sequence's left side.
+   */
   def overlap(f1: FASTASequence, f2: FASTASequence): Int =
     f1.sequence
       .tails
       .find(tail => f2.sequence.startsWith(tail))
       .fold(0) { _.length }
 
+  /**
+   * Finds the overlaps of a Set of FASTASequences.
+   * Returns a Vector of Overlaps in order from left to right.
+   *
+   * Under the hood, it finds overlaps in the left and right directions in parallel.
+   *
+   * @param sequences a Set of FASTASequences
+   * @param f2 second sequence, comparing its left side
+   * @return a Future containing Vector of Overlaps in order from left to right.
+   */
   def findOverlaps(sequences: Set[FASTASequence])(implicit ec: ExecutionContext): Future[Vector[Overlap]] = {
     if (sequences.isEmpty) {
       Future.successful(Vector())
@@ -74,6 +104,15 @@ object FASTA {
     }
   }
 
+  /**
+   * Finds the overlaps of a Set of FASTASequences, working in the left direction.
+   * Returns a Vector of Overlaps in order from left to right.
+   *
+   * @param current the current sequence for which to find a match
+   * @param sequences Set of candidate sequences
+   * @param acc accumulation Vector of Overlaps
+   * @return a Vector of Overlaps in order from left to right.
+   */
   def findOverlapsLeft(
     current: FASTASequence,
     sequences: Set[FASTASequence],
@@ -96,6 +135,15 @@ object FASTA {
     }
   }
 
+  /**
+   * Finds the overlaps of a Set of FASTASequences, working in the right direction.
+   * Returns a Vector of Overlaps in order from left to right.
+   *
+   * @param current the current sequence for which to find a match
+   * @param sequences Set of candidate sequences
+   * @param acc accumulation Vector of Overlaps
+   * @return a Vector of Overlaps in order from left to right.
+   */
   def findOverlapsRight(
     current: FASTASequence,
     sequences: Set[FASTASequence],
@@ -118,6 +166,12 @@ object FASTA {
     }
   }
 
+  /**
+   * Glues a sequence of overlaps into a superstring from left to right.
+   *
+   * @param overlaps a sequence of overlaps to glue together
+   * @return a superstring
+   */
   def glue(overlaps: Seq[Overlap]): String = {
     if (overlaps.isEmpty) {
       ""

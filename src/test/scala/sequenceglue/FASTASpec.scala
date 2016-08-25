@@ -5,7 +5,6 @@ import java.io.File
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.time.{ Minutes, Span }
 import org.scalatest.{ FlatSpec, Matchers }
 
